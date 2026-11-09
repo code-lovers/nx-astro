@@ -8,10 +8,13 @@
     "application": {
       "factory": "./dist/generators/application/application",
       "schema": "./dist/generators/application/schema.json",
-      "aliases": [
-        "app"
-      ],
+      "aliases": ["app"],
       "description": "Creates an Astro application and adds the Astro integrations that you select."
+    },
+    "integration": {
+      "factory": "./dist/generators/integration/integration",
+      "schema": "./dist/generators/integration/schema.json",
+      "description": "Runs astro add to add Astro integrations to an existing Astro project."
     }
   }
 }
