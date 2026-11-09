@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import {
+  addProjectConfiguration,
   installPackagesTask,
   readJson,
   readNxJson,
@@ -151,6 +152,18 @@ describe('applicationGenerator', () => {
       '"_site" is not a valid package name. Pass a --name such as "site" or "@acme/site".',
     ],
     [
+      { name: '~site' },
+      '"~site" is not a valid package name. Pass a --name such as "site" or "@acme/site".',
+    ],
+    [
+      { integrations: ['~root'] },
+      '"~root" is not a valid integration name. Pass names such as "react" or "@astrojs/mdx".',
+    ],
+    [
+      { integrations: ['@~acme/ui'] },
+      '"@~acme/ui" is not a valid integration name. Pass names such as "react" or "@astrojs/mdx".',
+    ],
+    [
       { integrations: ['--help'] },
       '"--help" is not a valid integration name. Pass names such as "react" or "@astrojs/mdx".',
     ],
@@ -172,5 +185,34 @@ describe('applicationGenerator', () => {
     await expect(generate()).rejects.toThrow(
       'apps/site already has a package.json. Pass a directory without a project.',
     );
+  });
+
+  it.each([
+    [
+      'a project.json',
+      (tree: Tree) =>
+        addProjectConfiguration(tree, 'site', { root: 'apps/old' }),
+    ],
+    [
+      'a package.json in the workspaces',
+      (tree: Tree) => {
+        writeJson(tree, 'package.json', {
+          name: 'root',
+          workspaces: ['apps/*'],
+        });
+        writeJson(tree, 'apps/old/package.json', { name: 'site' });
+      },
+    ],
+  ])('rejects a name that %s project already uses', async (_kind, addSite) => {
+    addSite(tree);
+    const changesBefore = tree.listChanges();
+
+    await expect(
+      generate({ directory: 'apps/new', name: 'site' }),
+    ).rejects.toThrow(
+      '"site" is already the name of the project in apps/old. Pass another --name.',
+    );
+
+    expect(tree.listChanges()).toEqual(changesBefore);
   });
 });

@@ -3,6 +3,7 @@ import {
   addProjectConfiguration,
   formatFiles,
   generateFiles,
+  getProjects,
   installPackagesTask,
   writeJson,
   type GeneratorCallback,
@@ -43,6 +44,12 @@ const normalizeOptions = (
   if (!isPackageName(name))
     throw new Error(
       `"${name}" is not a valid package name. Pass a --name such as "site" or "@acme/site".`,
+    );
+
+  const existing = getProjects(tree).get(name);
+  if (existing)
+    throw new Error(
+      `"${name}" is already the name of the project in ${existing.root}. Pass another --name.`,
     );
 
   const integrations = options.integrations ?? [];
