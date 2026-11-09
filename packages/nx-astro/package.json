@@ -12,6 +12,12 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./plugin": {
+      "@code-lovers/source": "./src/plugins/plugin.ts",
+      "types": "./dist/plugins/plugin.d.ts",
+      "import": "./dist/plugins/plugin.js",
+      "default": "./dist/plugins/plugin.js"
     }
   },
   "files": [
@@ -49,8 +55,12 @@
     }
   },
   "dependencies": {
+    "@nx/devkit": "^24.0.5",
     "magicast": "^0.5.5",
     "radashi": "^13.0.4",
     "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "astro": "^7.0.0"
   }
 }

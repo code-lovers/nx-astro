@@ -12,6 +12,8 @@ export default [
             '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
             '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
           ],
+          // The inferred targets run the astro CLI, so astro is a peer that no file imports.
+          ignoredDependencies: ['astro'],
         },
       ],
     },
