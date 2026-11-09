@@ -41,8 +41,9 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
-          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+      # No dependency cache in the job that publishes, so a poisoned cache
+      # cannot change the package.
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Test and build

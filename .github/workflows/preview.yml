@@ -1,8 +1,8 @@
 name: Preview package
 
 # Publishes the plugin of each PR to pkg.pr.new, so you can try it with
-# `nx add` before the release. GitHub gives no OIDC token to PRs from forks,
-# so the job runs only for branches of this repository.
+# `nx add` before the release. It needs the pkg.pr.new GitHub App on the
+# repository. Only PRs from branches of this repository publish a preview.
 on:
   pull_request:
 

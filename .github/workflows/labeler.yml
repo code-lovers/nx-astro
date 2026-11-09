@@ -3,7 +3,7 @@ name: PR Labeler
 # pull_request_target gives the token write access on PRs from forks. The job
 # never checks out the PR code, so the PR cannot run code with that token.
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
 
 jobs:
   labeler:
