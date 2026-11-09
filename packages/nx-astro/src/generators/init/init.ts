@@ -11,6 +11,17 @@ import type { InitGeneratorSchema } from './schema';
 
 const PLUGIN = '@code-lovers/nx-astro/plugin';
 
+const GITIGNORE = '.gitignore';
+const IGNORES_GENERATED_TYPES = /^\.astro\/?$/m;
+
+const ignoreGeneratedTypes = (tree: Tree) => {
+  const contents = tree.read(GITIGNORE, 'utf-8') ?? '';
+  if (IGNORES_GENERATED_TYPES.test(contents)) return;
+
+  const kept = contents === '' ? '' : `${contents.trimEnd()}\n\n`;
+  tree.write(GITIGNORE, `${kept}# Astro generated types\n.astro/\n`);
+};
+
 const registerPlugin = (tree: Tree) => {
   const nxJson = readNxJson(tree) ?? {};
   const plugins = nxJson.plugins ?? [];
@@ -30,6 +41,7 @@ export const initGenerator = async (
   options: InitGeneratorSchema,
 ): Promise<GeneratorCallback> => {
   registerPlugin(tree);
+  ignoreGeneratedTypes(tree);
   const install = addDependenciesToPackageJson(
     tree,
     {},

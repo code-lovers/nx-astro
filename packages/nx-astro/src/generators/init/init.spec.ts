@@ -60,4 +60,45 @@ describe('initGenerator', () => {
 
     expect(readJson(tree, 'package.json').devDependencies.astro).toBe('7.1.0');
   });
+
+  it('adds the generated types folder of Astro to the root .gitignore', async () => {
+    tree.write('.gitignore', 'node_modules\ndist\n');
+
+    await initGenerator(tree, { skipFormat: true });
+
+    expect(tree.read('.gitignore', 'utf-8')).toBe(
+      'node_modules\ndist\n\n# Astro generated types\n.astro/\n',
+    );
+  });
+
+  it('adds the folder when a line only ignores some .astro files', async () => {
+    tree.write('.gitignore', 'drafts/*.astro\n');
+
+    await initGenerator(tree, { skipFormat: true });
+
+    expect(tree.read('.gitignore', 'utf-8')).toBe(
+      'drafts/*.astro\n\n# Astro generated types\n.astro/\n',
+    );
+  });
+
+  it('creates the root .gitignore when the workspace has none', async () => {
+    tree.delete('.gitignore');
+
+    await initGenerator(tree, { skipFormat: true });
+
+    expect(tree.read('.gitignore', 'utf-8')).toBe(
+      '# Astro generated types\n.astro/\n',
+    );
+  });
+
+  it.each(['.astro', '.astro/'])(
+    'keeps a .gitignore that already ignores %s',
+    async (entry) => {
+      tree.write('.gitignore', `dist\n${entry}\n`);
+
+      await initGenerator(tree, { skipFormat: true });
+
+      expect(tree.read('.gitignore', 'utf-8')).toBe(`dist\n${entry}\n`);
+    },
+  );
 });
