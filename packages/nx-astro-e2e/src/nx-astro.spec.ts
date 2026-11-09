@@ -1,74 +1,109 @@
-import { execSync } from 'child_process';
-import { join, dirname } from 'path';
-import { mkdirSync, rmSync } from 'fs';
+import { execSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { version as nxVersion } from 'nx/package.json';
+
+const CACHE_HIT =
+  'Nx read the output from the cache instead of running the command for 1 out of 1 tasks.';
+
+// The e2e task runs inside Nx, which passes settings such as NX_SKIP_NX_CACHE
+// to it. The test workspace is a separate Nx workspace, so it gets none of them.
+const outerNxFreeEnv = Object.fromEntries(
+  Object.entries(process.env).filter(([name]) => !name.startsWith('NX_')),
+);
 
 describe('nx-astro', () => {
   let projectDirectory: string;
 
-  // This hook shells out synchronously twice, so its budget has to cover both
-  // installs on a cold package manager cache. Otherwise work that succeeded
-  // still fails on return.
+  const run = (command: string) =>
+    execSync(command, {
+      cwd: projectDirectory,
+      encoding: 'utf-8',
+      env: {
+        ...outerNxFreeEnv,
+        NX_DAEMON: 'false',
+        NX_NO_CLOUD: 'true',
+        // Every run publishes the same 0.0.0-e2e version, so a shared metadata
+        // cache would install the tarball of an earlier run.
+        pnpm_config_cache_dir: join(dirname(projectDirectory), 'pnpm-cache'),
+      },
+    });
+
+  const writeFile = (path: string, content: string) => {
+    const absolutePath = join(projectDirectory, path);
+    mkdirSync(dirname(absolutePath), { recursive: true });
+    writeFileSync(absolutePath, content);
+  };
+
+  // Each hook shells out to package installs, so the budget covers a cold
+  // package manager cache.
   beforeAll(() => {
     projectDirectory = createTestProject();
-
-    // The plugin has been built and published to a local registry in the globalSetup
-    // Install the plugin built with the latest source code into the test repo
-    execSync(
-      `pnpm add -Dw --config.frozen-lockfile=false --allow-build=nx --allow-build=@swc/core @code-lovers/nx-astro@e2e`,
-      {
-        cwd: projectDirectory,
-        stdio: 'inherit',
-        env: process.env,
-      },
+    run(
+      'pnpm add -Dw --config.frozen-lockfile=false --allow-build=nx --allow-build=@swc/core @code-lovers/nx-astro@e2e',
     );
-  }, 300_000);
+    run(
+      'pnpm nx g @code-lovers/nx-astro:application apps/site --no-interactive',
+    );
+  }, 600_000);
 
   afterAll(() => {
-    if (projectDirectory) {
-      // Cleanup the test project
-      rmSync(projectDirectory, {
-        recursive: true,
-        force: true,
-      });
-    }
+    if (projectDirectory)
+      rmSync(dirname(projectDirectory), { recursive: true, force: true });
   });
 
-  it('should be installed', () => {
-    // npm ls will fail if the package is not installed properly
-    execSync('pnpm ls --depth 100 @code-lovers/nx-astro', {
-      cwd: projectDirectory,
-      stdio: 'inherit',
+  it('restores the build output of an Astro app from the cache', () => {
+    const buildCommand = 'pnpm nx build site --output-style=static';
+
+    expect(run(buildCommand)).not.toContain(CACHE_HIT);
+    rmSync(join(projectDirectory, 'apps/site/dist'), { recursive: true });
+
+    expect(run(buildCommand)).toContain(CACHE_HIT);
+    expect(
+      existsSync(join(projectDirectory, 'apps/site/dist/index.html')),
+    ).toBe(true);
+  }, 300_000);
+
+  it('adds a graph edge from an Astro app to a library that a .astro file imports', () => {
+    writeFile(
+      'apps/ui/package.json',
+      JSON.stringify({ name: '@acme/ui', private: true }),
+    );
+    writeFile('apps/ui/Button.astro', '<button><slot /></button>\n');
+    writeFile(
+      'apps/site/src/pages/ui.astro',
+      "---\nimport Button from '@acme/ui/Button.astro';\n---\n<Button>Go</Button>\n",
+    );
+
+    run('pnpm nx graph --file=graph.json');
+    const { graph } = JSON.parse(
+      readFileSync(join(projectDirectory, 'graph.json'), 'utf-8'),
+    );
+
+    expect(graph.dependencies.site).toContainEqual({
+      source: 'site',
+      target: '@acme/ui',
+      type: 'static',
     });
-  });
+  }, 300_000);
 });
 
-/**
- * Creates a test project with create-nx-workspace and installs the plugin
- * @returns The directory where the test project was created
- */
 function createTestProject() {
   const projectName = 'test-project';
-  const projectDirectory = join(process.cwd(), 'tmp', projectName);
-
-  // Ensure projectDirectory is empty
-  rmSync(projectDirectory, {
-    recursive: true,
-    force: true,
-  });
-  mkdirSync(dirname(projectDirectory), {
-    recursive: true,
-  });
+  const parentDirectory = mkdtempSync(join(tmpdir(), 'nx-astro-e2e-'));
 
   execSync(
     `pnpm dlx create-nx-workspace@${nxVersion} ${projectName} --preset apps --nxCloud=skip --no-interactive --packageManager=pnpm`,
-    {
-      cwd: dirname(projectDirectory),
-      stdio: 'inherit',
-      env: process.env,
-    },
+    { cwd: parentDirectory, stdio: 'inherit', env: process.env },
   );
-  console.log(`Created test project in "${projectDirectory}"`);
 
-  return projectDirectory;
+  return join(parentDirectory, projectName);
 }
