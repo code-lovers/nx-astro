@@ -49,12 +49,21 @@ describe('applicationGenerator', () => {
       extends: 'astro/tsconfigs/strict',
       include: ['.astro/types.d.ts', '**/*'],
       exclude: ['dist'],
+      nx: { addTypecheckTarget: false },
     });
     expect(readJson(tree, 'apps/site/package.json')).toEqual({
       name: 'site',
       private: true,
       type: 'module',
       dependencies: { astro: astroVersion },
+    });
+  });
+
+  it('turns off the tsc typecheck target, which cannot check .astro files', async () => {
+    await generate();
+
+    expect(readJson(tree, 'apps/site/tsconfig.json').nx).toEqual({
+      addTypecheckTarget: false,
     });
   });
 
