@@ -1,0 +1,9 @@
+{
+  "generators": {
+    "init": {
+      "factory": "./dist/generators/init/init",
+      "schema": "./dist/generators/init/schema.json",
+      "description": "Registers the Astro plugin in nx.json and adds astro to the workspace."
+    }
+  }
+}

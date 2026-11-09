@@ -25,7 +25,7 @@ export default [
     ignores: ['**/out-tsc'],
   },
   {
-    files: ['**/package.json'],
+    files: ['**/package.json', '**/generators.json'],
     rules: {
       '@nx/nx-plugin-checks': 'error',
     },

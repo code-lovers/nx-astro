@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "NxAstroInit",
+  "title": "Init Astro",
+  "description": "Registers @code-lovers/nx-astro/plugin in nx.json and adds astro to the root devDependencies.",
+  "type": "object",
+  "properties": {
+    "skipFormat": {
+      "type": "boolean",
+      "description": "Do not format the changed files.",
+      "default": false
+    }
+  }
+}

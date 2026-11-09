@@ -22,7 +22,8 @@
   },
   "files": [
     "dist",
-    "!**/*.tsbuildinfo"
+    "!**/*.tsbuildinfo",
+    "generators.json"
   ],
   "nx": {
     "name": "nx-astro",
@@ -62,5 +63,6 @@
   },
   "peerDependencies": {
     "astro": "^7.0.0"
-  }
+  },
+  "generators": "./generators.json"
 }
