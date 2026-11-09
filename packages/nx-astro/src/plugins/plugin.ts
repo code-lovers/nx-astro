@@ -125,3 +125,5 @@ export const createNodes: CreateNodes<AstroPluginOptions> = [
       context,
     ),
 ];
+
+export { createDependencies } from './graph/create-dependencies';
