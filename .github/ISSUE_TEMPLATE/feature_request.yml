@@ -1,0 +1,38 @@
+name: ✨ Feature request
+description: Suggest a new task, generator, option or change.
+labels: ['type: feature', 'needs triage']
+body:
+  - type: checkboxes
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the [existing issues](../issues?q=is%3Aissue) and found no request for this feature.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Problem
+      description: What do you want to do, and what stops you now?
+      placeholder: When I ..., I have to ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Proposed solution
+      description: What do you want the plugin to do? Include the commands or the `nx.json` configuration that you expect.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: Other solutions or workarounds that you tried.
+
+  - type: dropdown
+    attributes:
+      label: Do you want to send a pull request for this?
+      options:
+        - 'Yes'
+        - 'No'
+        - Maybe, with help
