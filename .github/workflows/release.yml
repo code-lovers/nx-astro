@@ -43,8 +43,7 @@ jobs:
       - name: Test and build
         run: pnpm nx run-many -t test build -p nx-astro
       - name: Check the package
-        working-directory: packages/nx-astro
-        run: pnpm dlx publint@0.3.18 .
+        run: pnpm check:package
       - name: Publish to npm
         working-directory: packages/nx-astro
         run: pnpm publish --provenance --access public --no-git-checks

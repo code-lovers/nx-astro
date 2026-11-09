@@ -36,6 +36,11 @@ jobs:
         run: pnpm exec prettier --check .
       - name: Lint, test, build and typecheck
         run: pnpm nx affected -t lint test build typecheck --exclude=nx-astro-e2e
+      - name: Check the package and unused code
+        run: |
+          pnpm nx build nx-astro
+          pnpm check:package
+          pnpm exec knip
       # The e2e publishes the plugin to a local registry and creates a new Nx
       # workspace with it, so it runs after the other targets pass.
       - name: e2e
