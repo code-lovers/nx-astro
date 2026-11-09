@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "NxAstroApplication",
+  "title": "Astro application",
+  "type": "object",
+  "properties": {
+    "directory": {
+      "type": "string",
+      "description": "The folder of the new project, relative to the workspace root.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Which directory do you want to create the application in?",
+      "x-priority": "important"
+    },
+    "name": {
+      "type": "string",
+      "description": "The package name of the project. The default is the last segment of the directory.",
+      "x-priority": "important"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Tags for the project, separated by commas. Nx uses them for module boundary rules."
+    },
+    "integrations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "The Astro integrations that `astro add` adds after the install, for example react or mdx.",
+      "x-prompt": {
+        "message": "Which Astro integrations do you want to add?",
+        "type": "list",
+        "multiselect": true,
+        "items": [
+          {
+            "value": "react",
+            "label": "React"
+          },
+          {
+            "value": "preact",
+            "label": "Preact"
+          },
+          {
+            "value": "vue",
+            "label": "Vue"
+          },
+          {
+            "value": "svelte",
+            "label": "Svelte"
+          },
+          {
+            "value": "solid-js",
+            "label": "Solid"
+          },
+          {
+            "value": "lit",
+            "label": "Lit"
+          },
+          {
+            "value": "alpinejs",
+            "label": "Alpine.js"
+          },
+          {
+            "value": "starlight",
+            "label": "Starlight (docs)"
+          },
+          {
+            "value": "netlify",
+            "label": "Netlify adapter"
+          },
+          {
+            "value": "vercel",
+            "label": "Vercel adapter"
+          },
+          {
+            "value": "deno",
+            "label": "Deno adapter"
+          },
+          {
+            "value": "cloudflare",
+            "label": "Cloudflare adapter"
+          },
+          {
+            "value": "node",
+            "label": "Node adapter"
+          },
+          {
+            "value": "tailwind",
+            "label": "Tailwind CSS"
+          },
+          {
+            "value": "mdx",
+            "label": "MDX"
+          },
+          {
+            "value": "markdoc",
+            "label": "Markdoc"
+          },
+          {
+            "value": "partytown",
+            "label": "Partytown"
+          },
+          {
+            "value": "sitemap",
+            "label": "Sitemap"
+          }
+        ]
+      }
+    },
+    "skipFormat": {
+      "type": "boolean",
+      "description": "Do not format the changed files.",
+      "default": false,
+      "x-priority": "internal"
+    }
+  },
+  "required": ["directory"]
+}
