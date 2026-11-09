@@ -23,8 +23,8 @@ An [Nx](https://nx.dev) plugin for [Astro](https://astro.build) projects: cached
 
 | Dependency | Version                                   |
 | ---------- | ----------------------------------------- |
-| `nx`       | 24 or later                               |
-| `astro`    | 7 or later                                |
+| `nx`       | 24                                        |
+| `astro`    | 7                                         |
 | Node.js    | 22.23.4 or later (the minimum of Astro 7) |
 
 ## Getting started
@@ -150,23 +150,25 @@ Set the options in the `nx.json` entry of the plugin:
     {
       "plugin": "@code-lovers/nx-astro/plugin",
       "options": {
-        "buildTargetName": "astro-build",
-        "outDir": "./public-dist"
+        "buildTargetName": "astro-build"
       }
     }
   ]
 }
 ```
 
-| Option              | Default                        | Description                                      |
-| ------------------- | ------------------------------ | ------------------------------------------------ |
-| `buildTargetName`   | `build`                        | The name of the build task.                      |
-| `syncTargetName`    | `sync`                         | The name of the sync task.                       |
-| `devTargetName`     | `dev`                          | The name of the dev task.                        |
-| `previewTargetName` | `preview`                      | The name of the preview task.                    |
-| `checkTargetName`   | `check`                        | The name of the check task.                      |
-| `root`              | From the config, else `.`      | The Astro `root`, when the config computes it.   |
-| `outDir`            | From the config, else `./dist` | The Astro `outDir`, when the config computes it. |
+| Option              | Default                        | Description                                                   |
+| ------------------- | ------------------------------ | ------------------------------------------------------------- |
+| `buildTargetName`   | `build`                        | The name of the build task.                                   |
+| `syncTargetName`    | `sync`                         | The name of the sync task.                                    |
+| `devTargetName`     | `dev`                          | The name of the dev task.                                     |
+| `previewTargetName` | `preview`                      | The name of the preview task.                                 |
+| `checkTargetName`   | `check`                        | The name of the check task.                                   |
+| `root`              | From the config, else `.`      | The Astro `root` that the plugin uses for the task outputs.   |
+| `outDir`            | From the config, else `./dist` | The Astro `outDir` that the plugin uses for the task outputs. |
+
+> [!NOTE]
+> `root` and `outDir` replace the value from the config file, for every Astro project. They do not change where Astro writes the build. Set them only when your config computes the value, and set them to the value that Astro uses.
 
 ## Known limitations
 
