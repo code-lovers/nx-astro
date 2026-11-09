@@ -1,9 +1,23 @@
 {
   "name": "@code-lovers/nx-astro",
-  "version": "0.0.0-e2e",
+  "version": "0.0.0",
+  "description": "Nx plugin for Astro: inferred and cached tasks, project graph edges from .astro imports, and generators.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/code-lovers/nx-astro.git",
+    "directory": "packages/nx-astro"
+  },
+  "homepage": "https://github.com/code-lovers/nx-astro/tree/main/packages/nx-astro#readme",
+  "bugs": "https://github.com/code-lovers/nx-astro/issues",
+  "keywords": [
+    "nx",
+    "nx-plugin",
+    "astro",
+    "monorepo"
+  ],
   "type": "commonjs",
   "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
