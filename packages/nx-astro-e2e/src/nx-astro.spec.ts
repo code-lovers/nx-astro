@@ -83,12 +83,16 @@ describe('nx-astro', () => {
       "---\nimport Button from '@acme/ui/Button.astro';\n---\n<Button>Go</Button>\n",
     );
 
-    run('pnpm nx graph --file=graph.json');
+    // The verbose output shows why the plugin found no edge, for example when
+    // the Astro compiler does not load on the platform.
+    const graphOutput = run(
+      'NX_VERBOSE_LOGGING=true pnpm nx graph --file=graph.json',
+    );
     const { graph } = JSON.parse(
       readFileSync(join(projectDirectory, 'graph.json'), 'utf-8'),
     );
 
-    expect(graph.dependencies.site).toContainEqual({
+    expect(graph.dependencies.site, graphOutput).toContainEqual({
       source: 'site',
       target: '@acme/ui',
       type: 'static',
