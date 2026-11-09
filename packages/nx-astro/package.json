@@ -49,6 +49,8 @@
     }
   },
   "dependencies": {
+    "magicast": "^0.5.5",
+    "radashi": "^13.0.4",
     "tslib": "^2.3.0"
   }
 }

@@ -287,6 +287,12 @@ importers:
 
   packages/nx-astro:
     dependencies:
+      magicast:
+        specifier: ^0.5.5
+        version: 0.5.5
+      radashi:
+        specifier: ^13.0.4
+        version: 13.0.4
       tslib:
         specifier: ^2.3.0
         version: 2.9.1
@@ -4207,6 +4213,10 @@ packages:
   quick-lru@5.1.1:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
+
+  radashi@13.0.4:
+    resolution: {integrity: sha512-LbAKjpZi73m544arwpuKesF3lDFNKDL4N9gqW2E+/CDl2lsGLF2ABB5yhyKb7nnjmrKpn2QMUogv7Q0vMtyODw==}
+    engines: {node: '>=18.0.0'}
 
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
@@ -9465,6 +9475,8 @@ snapshots:
   quick-format-unescaped@4.0.4: {}
 
   quick-lru@5.1.1: {}
+
+  radashi@13.0.4: {}
 
   range-parser@1.2.1: {}
 
