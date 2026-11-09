@@ -11,6 +11,7 @@ Branch: `main` for the scaffold, then `feat/plugin-v1`. Delivery: local only, no
 - S4. Package name `@code-lovers/nx-astro`. Astro 7 only.
 - S5. Commits: Conventional Commits, no AI attribution, no `Co-Authored-By`. Author `Johnny Huirilef <johnnyhuirilef@gmail.com>`. Check `%ae` before any push.
 - S6. Test-first: observe RED before each rule is implemented, then GREEN. Mutation check on new lines (rule 31).
+- S7. Astro integrations (L8, approved 2026-11-09 with "si"): the `application` generator takes an `integrations` option with an `x-prompt` multiselect and runs `astro add <names> --yes` in the project folder after the files are written. An `integration` generator adds integrations to an existing project.
 
 ## Tasks
 
@@ -21,7 +22,7 @@ Branch: `main` for the scaffold, then `feat/plugin-v1`. Delivery: local only, no
 | T3 | S1-S3, S6 | `targets/` and `createNodes` (no cache, see L5) | inline | done | RED 10/10 (targets) and 9/11 (plugin) on stubs, GREEN 35/35. 24 mutants killed (3 survived first, fixed with 3 tests). test, typecheck, lint, build exit 0. Smoke: real nx 24.0.5 loads `dist/plugins/plugin.js` and infers build, dev, preview, sync |
 | T4 | S1-S3, S6 | `graph/`: import specifiers from `.astro` files | inline | done | RED 7/9 on stubs, GREEN 51/51 (whole package). 17 mutants killed (5 survived across two rounds, fixed with tests or by removing a redundant check). test, typecheck, lint, build exit 0 |
 | T5 | S1-S3, S6 | `graph/`: map specifiers to projects, `createDependencies` | inline | pending | |
-| T6 | S1-S3, S6 | `init` and `application` generators | inline | pending | |
+| T6 | S1-S3, S6, S7 | `init`, `application` (with `integrations`) and `integration` generators | inline | pending | |
 | T7 | S1, S6 | e2e: cache hit and graph edge | inline | pending | |
 | T8 | S1 | Try it on one Astro project, README | inline | pending | |
 
@@ -37,3 +38,4 @@ Route evidence: no Writer trigger. The tasks depend on each other in sequence, s
 - L6 (2026-11-09): T4. `@astrojs/compiler-rs` 0.5.2 is ESM only and loads through `require()`. It never throws: it returns `diagnostics` and a partial AST, so frontmatter imports survive a broken template. Type-level `import('x').T` is a `TSImportType` with a literal `source`, so the node-type filter is needed. CSS `@import` is not parsed as JS, so it gives no edge. `astro` 7.4.7 is now a root devDependency for tests and the e2e.
 - L7 (2026-11-09), user: "ojo con esto?? [the bare try/catch in loadAstroParser] ver si podeos mejorarlo". Result: `loadAstroParser` returns `AstroParserLoad` with `loaded`, `astro-not-found` or `compiler-unavailable` plus the reason, so T5 can log each case at its own level (rules 21 and 28).
 - L8 (2026-11-09), user: "ojo con astro, porque tiene su propio sistema de preguntar si usar react, svelte entre otras preguntas y eso deberia soportarlo el plugins no???". Proposal for T6, pending the user's decision: an `integrations` option on the `application` generator with an `x-prompt` multiselect, which runs `astro add <names> --yes` after the files are written, plus an `integration` generator for existing projects. Verified: `astro add --help` in 7.4.7 lists `--yes` and the integrations (react, preact, vue, svelte, solid-js, lit, alpinejs, starlight, netlify, vercel, deno, cloudflare, node, tailwind, mdx, markdoc, partytown, sitemap).
+- L9 (2026-11-09), user: "si" to the L8 proposal. Added S7 and widened T6.

@@ -107,7 +107,9 @@ This step uses only the project graph data that `CreateDependenciesContext` give
 ### 4. Generators
 
 - `init`: adds the plugin to `nx.json` once, and adds `astro` to `devDependencies`. Other generators call it.
-- `application`: creates `astro.config.mjs`, `src/pages/index.astro`, `tsconfig.json` that extends `astro/tsconfigs/strict`, and `package.json`. Options: `directory`, `name`, `tags`, `skipFormat`.
+- `application`: creates `astro.config.mjs`, `src/pages/index.astro`, `tsconfig.json` that extends `astro/tsconfigs/strict`, and `package.json`. Options: `directory`, `name`, `tags`, `integrations`, `skipFormat`.
+- `integrations` is a multiselect with an `x-prompt`, so `nx g` asks the same question as `create-astro`. After the files are written and installed, the generator runs `astro add <names> --yes` in the project folder. Astro then installs the packages and edits `astro.config`, so the plugin keeps no copy of that list (decision 4).
+- `integration`: runs `astro add <names> --yes` for an existing project. Options: `project`, `names`.
 
 ### 5. Migrations
 
@@ -134,6 +136,8 @@ Each Astro major gets a migration that updates the `astro` version and prints a 
 2. Astro 7 only (2026-11-09). The graph parser is `@astrojs/compiler-rs`, resolved from the installed `astro`. Astro 7 is the first major where that compiler is the only one. Support for Astro 6 could need a second parser for a version that is going away.
 
 3. No target cache (2026-11-09). See section 2. `srcDir` and `publicDir` are not read, because no target uses them.
+
+4. Integrations through `astro add --yes` (2026-11-09). Astro 7.4.7 lists `--yes` in `astro add --help`. Astro maintains the packages and the config change of each integration.
 
 ## Open decisions
 
