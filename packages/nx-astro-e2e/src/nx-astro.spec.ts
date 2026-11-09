@@ -77,6 +77,9 @@ describe('nx-astro', () => {
       'apps/ui/package.json',
       JSON.stringify({ name: '@acme/ui', private: true }),
     );
+    // create-nx-workspace does not always write a packages glob for pnpm, and
+    // without workspaces a folder with only a package.json is not a project.
+    writeFile('apps/ui/project.json', JSON.stringify({ name: '@acme/ui' }));
     writeFile('apps/ui/Button.astro', '<button><slot /></button>\n');
     writeFile(
       'apps/site/src/pages/ui.astro',
