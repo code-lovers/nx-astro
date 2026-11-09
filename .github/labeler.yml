@@ -1,0 +1,19 @@
+'package: nx-astro':
+  - changed-files:
+      - any-glob-to-any-file: 'packages/nx-astro/**'
+
+'e2e':
+  - changed-files:
+      - any-glob-to-any-file: 'packages/nx-astro-e2e/**'
+
+'documentation':
+  - changed-files:
+      - any-glob-to-any-file: ['**/*.md', 'docs/**']
+
+'ci':
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+
+'dependencies':
+  - changed-files:
+      - any-glob-to-any-file: 'pnpm-lock.yaml'
