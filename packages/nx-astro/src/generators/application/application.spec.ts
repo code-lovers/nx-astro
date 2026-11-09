@@ -37,7 +37,7 @@ describe('applicationGenerator', () => {
     tree = createTreeWithEmptyWorkspace();
   });
 
-  it('writes an Astro project with a package.json named after the folder', async () => {
+  it('writes the files of an Astro project', async () => {
     await generate();
 
     expect(tree.read('apps/site/astro.config.mjs', 'utf-8')).toContain(
@@ -52,12 +52,6 @@ describe('applicationGenerator', () => {
       exclude: ['dist'],
       nx: { addTypecheckTarget: false },
     });
-    expect(readJson(tree, 'apps/site/package.json')).toEqual({
-      name: 'site',
-      private: true,
-      type: 'module',
-      dependencies: { astro: astroVersion },
-    });
   });
 
   it('turns off the tsc typecheck target, which cannot check .astro files', async () => {
@@ -68,7 +62,7 @@ describe('applicationGenerator', () => {
     });
   });
 
-  it('writes a project.json with the trimmed tags when the workspace does not use workspaces', async () => {
+  it('writes a project.json with the trimmed tags and no package.json when the workspace does not use workspaces', async () => {
     await generate({ name: '@acme/site', tags: 'scope:web, type:app' });
 
     expect(readProjectConfiguration(tree, '@acme/site')).toEqual(
@@ -79,16 +73,23 @@ describe('applicationGenerator', () => {
         tags: ['scope:web', 'type:app'],
       }),
     );
-    expect(readJson(tree, 'apps/site/package.json').nx).toBeUndefined();
+    expect(tree.exists('apps/site/package.json')).toBe(false);
+    expect(readJson(tree, 'package.json').devDependencies).toEqual(
+      expect.objectContaining({ astro: astroVersion }),
+    );
   });
 
-  it('puts the tags in package.json and writes no project.json when the workspace uses workspaces', async () => {
+  it('writes a package.json named after the folder with the tags and no project.json when the workspace uses workspaces', async () => {
     writeJson(tree, 'package.json', { name: 'source', workspaces: ['apps/*'] });
 
     await generate({ tags: 'scope:web' });
 
-    expect(readJson(tree, 'apps/site/package.json').nx).toEqual({
-      tags: ['scope:web'],
+    expect(readJson(tree, 'apps/site/package.json')).toEqual({
+      name: 'site',
+      private: true,
+      type: 'module',
+      dependencies: { astro: astroVersion },
+      nx: { tags: ['scope:web'] },
     });
     expect(tree.exists('apps/site/project.json')).toBe(false);
   });

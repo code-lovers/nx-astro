@@ -63,6 +63,28 @@ const normalizeOptions = (
   return { projectRoot, name, tags, integrations };
 };
 
+// A project with its own package.json joins the package manager workspaces.
+// Without workspaces it gets a project.json, and `astro add` installs into the
+// root package.json, as the other Nx generators do.
+const writeWorkspacePackage = (tree: Tree, options: NormalizedOptions) => {
+  writeJson(tree, posix.join(options.projectRoot, 'package.json'), {
+    name: options.name,
+    private: true,
+    type: 'module',
+    dependencies: { astro: astroVersion },
+    ...(options.tags.length > 0 && { nx: { tags: options.tags } }),
+  });
+  addProjectToWorkspaces(tree, options.projectRoot);
+};
+
+const writeProjectConfiguration = (tree: Tree, options: NormalizedOptions) =>
+  addProjectConfiguration(tree, options.name, {
+    root: options.projectRoot,
+    projectType: 'application',
+    sourceRoot: posix.join(options.projectRoot, 'src'),
+    tags: [...options.tags],
+  });
+
 const writeProject = (
   tree: Tree,
   options: NormalizedOptions,
@@ -72,23 +94,8 @@ const writeProject = (
     name: options.name,
     tmpl: '',
   });
-  writeJson(tree, posix.join(options.projectRoot, 'package.json'), {
-    name: options.name,
-    private: true,
-    type: 'module',
-    dependencies: { astro: astroVersion },
-    ...(usesWorkspaces &&
-      options.tags.length > 0 && { nx: { tags: options.tags } }),
-  });
-
-  if (usesWorkspaces) addProjectToWorkspaces(tree, options.projectRoot);
-  else
-    addProjectConfiguration(tree, options.name, {
-      root: options.projectRoot,
-      projectType: 'application',
-      sourceRoot: posix.join(options.projectRoot, 'src'),
-      tags: [...options.tags],
-    });
+  if (usesWorkspaces) writeWorkspacePackage(tree, options);
+  else writeProjectConfiguration(tree, options);
 };
 
 export const applicationGenerator = async (
