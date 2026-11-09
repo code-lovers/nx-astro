@@ -16,7 +16,7 @@ Branch: `main` for the scaffold, then `feat/plugin-v1`. Delivery: local only, no
 
 | ID | Specs | Task | Route | Status | Evidence |
 |---|---|---|---|---|---|
-| T1 | S1, S4, S5 | Plugin workspace with `@nx/plugin`, vitest and e2e setup | inline | in progress | |
+| T1 | S1, S4, S5 | Plugin workspace with `@nx/plugin`, vitest and e2e setup | inline | done | `e4fa051` on `main`. lint, build, typecheck exit 0. e2e 1/1 passed. `nx-astro:test` fails with "No test files found" until T2 adds the first spec |
 | T2 | S1-S3, S6 | `config/`: static parse of `astro.config.*` | inline | pending | |
 | T3 | S1-S3, S6 | `targets/` and `createNodes` with `PluginCache` | inline | pending | |
 | T4 | S1-S3, S6 | `graph/`: import specifiers from `.astro` files | inline | pending | |
@@ -31,3 +31,4 @@ Route evidence: no Writer trigger. The tasks depend on each other in sequence, s
 
 - L1 (2026-11-09): "si vamos a usar nuestro checklist de calidad que esta en obsidian, lo peudes buscar con mas de 40+ puntos que verificar" (answer to "¿Arranco con T1?").
 - L2: Decisions taken before L1: package `@code-lovers/nx-astro`, Astro 7 only. See `docs/design.md`, section Decisions.
+- L3 (2026-11-09): T1. `create-nx-plugin@24.0.5` ignored `--interactive=false` and blocked on the `createPackageName` prompt, so the workspace came from `create-nx-workspace --preset=ts` plus `@nx/plugin:plugin`. Template fixes: vitest `environment` from `jsdom` to `node`, e2e `pnpm add` with `--allow-build=nx --allow-build=@swc/core` (pnpm 12 fails on ignored builds), `create-nx-workspace` pinned to the nx version, custom condition `@org/source` renamed to `@code-lovers/source`. Known noise: the verdaccio executor logs "Failed to start verdaccio: undefined" at teardown while the e2e passes. The template also committed AI agent folders (`.agents`, `.claude`, `.codex`, `.cursor`, `.gemini`, `.opencode`, `.github/skills`).
