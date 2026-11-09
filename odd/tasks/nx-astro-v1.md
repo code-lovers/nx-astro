@@ -1,0 +1,33 @@
+# nx-astro v1
+
+Objective: first release of `@code-lovers/nx-astro`, an Nx 24 plugin for Astro 7, per `docs/design.md`.
+Branch: `main` for the scaffold, then `feat/plugin-v1`. Delivery: local only, no push or publish without explicit approval. Test runner: vitest.
+
+## Specs
+
+- S1. The design in `docs/design.md` is the specification. Every task implements its section of the design.
+- S2. Quality checklist: "si vamos a usar nuestro checklist de calidad que esta en obsidian, lo peudes buscar con mas de 40+ puntos que verificar". Source: `Open Source/00 Playbook/Playbook - Checklist de reglas.md` (44 rules) in the Obsidian vault. Rules 1 to 14 apply while writing. Rules 15 to 44 are audits before review. This is Johnny's own project, so rules 6, 9, 10 and 12 apply in full.
+- S3. The five focus points: "código declarativo y nunca imperativo, baja complejidad ciclomática, baja entropía, buena DX, mantenibilidad".
+- S4. Package name `@code-lovers/nx-astro`. Astro 7 only.
+- S5. Commits: Conventional Commits, no AI attribution, no `Co-Authored-By`. Author `Johnny Huirilef <johnnyhuirilef@gmail.com>`. Check `%ae` before any push.
+- S6. Test-first: observe RED before each rule is implemented, then GREEN. Mutation check on new lines (rule 31).
+
+## Tasks
+
+| ID | Specs | Task | Route | Status | Evidence |
+|---|---|---|---|---|---|
+| T1 | S1, S4, S5 | Plugin workspace with `@nx/plugin`, vitest and e2e setup | inline | in progress | |
+| T2 | S1-S3, S6 | `config/`: static parse of `astro.config.*` | inline | pending | |
+| T3 | S1-S3, S6 | `targets/` and `createNodes` with `PluginCache` | inline | pending | |
+| T4 | S1-S3, S6 | `graph/`: import specifiers from `.astro` files | inline | pending | |
+| T5 | S1-S3, S6 | `graph/`: map specifiers to projects, `createDependencies` | inline | pending | |
+| T6 | S1-S3, S6 | `init` and `application` generators | inline | pending | |
+| T7 | S1, S6 | e2e: cache hit and graph edge | inline | pending | |
+| T8 | S1 | Try it on one Astro project, README | inline | pending | |
+
+Route evidence: no Writer trigger. The tasks depend on each other in sequence, so no parallel units.
+
+## Log
+
+- L1 (2026-11-09): "si vamos a usar nuestro checklist de calidad que esta en obsidian, lo peudes buscar con mas de 40+ puntos que verificar" (answer to "¿Arranco con T1?").
+- L2: Decisions taken before L1: package `@code-lovers/nx-astro`, Astro 7 only. See `docs/design.md`, section Decisions.

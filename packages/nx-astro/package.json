@@ -1,0 +1,54 @@
+{
+  "name": "@code-lovers/nx-astro",
+  "version": "0.0.0-e2e",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@code-lovers/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "nx": {
+    "name": "nx-astro",
+    "targets": {
+      "build": {
+        "executor": "@nx/js:tsc",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "options": {
+          "outputPath": "packages/nx-astro/dist",
+          "main": "packages/nx-astro/src/index.ts",
+          "tsConfig": "packages/nx-astro/tsconfig.lib.json",
+          "rootDir": "packages/nx-astro/src",
+          "generatePackageJson": false,
+          "assets": [
+            {
+              "input": "./packages/nx-astro/src",
+              "glob": "**/!(*.ts)",
+              "output": "."
+            },
+            {
+              "input": "./packages/nx-astro/src",
+              "glob": "**/*.d.ts",
+              "output": "."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}

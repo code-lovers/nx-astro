@@ -1,0 +1,23 @@
+{
+  "name": "nx-astro-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "projectType": "application",
+    "sourceRoot": "packages/nx-astro-e2e/src",
+    "implicitDependencies": [
+      "nx-astro"
+    ],
+    "targets": {
+      "e2e": {
+        "dependsOn": [
+          "^build"
+        ],
+        "options": {
+          "maxWorkers": 1,
+          "isolate": false
+        }
+      }
+    }
+  }
+}
