@@ -20,11 +20,11 @@ An Nx plugin for Astro that works the way the Nx 24 first-party plugins work. Nx
 
 ## Support matrix
 
-| Dependency | Range | Reason |
-|---|---|---|
-| `nx`, `@nx/devkit` | `^24.0.0` | `CreateNodes`, `PluginCache`, `calculateHashesForCreateNodes`, `continuous` tasks |
-| `astro` | `^7.0.0` | Rust compiler, Vite 8, current config defaults |
-| Node.js | `>=22.23.4` | The `engines.node` of Astro 7 |
+| Dependency         | Range       | Reason                                                    |
+| ------------------ | ----------- | --------------------------------------------------------- |
+| `nx`, `@nx/devkit` | `^24.0.5`   | `CreateNodes`, `createNodesFromFiles`, `continuous` tasks |
+| `astro`            | `^7.0.0`    | Rust compiler, Vite 8, current config defaults            |
+| Node.js            | `>=22.23.4` | The `engines.node` of Astro 7                             |
 
 ## Architecture
 
@@ -38,45 +38,47 @@ src/
     targets/             builds the inferred targets from the config facts
     graph/               finds imports in .astro files and maps them to projects
   generators/
-    init/                registers the plugin in nx.json, adds astro to devDependencies
+    init/                registers the plugin in nx.json, adds astro to devDependencies, ignores .astro/
     application/         creates an Astro app
+    integration/         runs astro add for an existing project
+    utils/               workspaces globs and the astro add task
   migrations/
 ```
 
 ### 1. Config facts (`config/`)
 
-The plugin needs `outDir`, `srcDir` and `publicDir` for the task inputs and outputs. Astro has no public API that returns the resolved config.
+The plugin needs `root` and `outDir` for the task outputs. The task inputs use the named inputs of the project, which already cover `srcDir` and `publicDir`. Astro has no public API that returns the resolved config.
 
 Decision: parse the config file statically and read literal values only.
 
 - The plugin looks for `astro.config.mjs`, `.js`, `.ts` and `.mts`, in the same order as Astro. Astro 6 dropped `.cjs` and `.cts`.
-- The parser reads the object that the file passes to `defineConfig` or exports as default. It reads `outDir`, `srcDir`, `publicDir` and `root` only when each value is a string literal.
-- If a value is not a literal, the plugin uses the Astro default (`./dist`, `./src`, `./public`) and logs a debug message.
-- A plugin option overrides each value: `outDir`, `srcDir`, `publicDir`.
+- The parser reads the object that the file passes to `defineConfig` or exports as default. It reads `root` and `outDir` only when each value is a string literal.
+- If a value is not a literal, the plugin uses the Astro default (`.` and `./dist`) and logs a verbose message.
+- A plugin option overrides each value: `root` and `outDir`.
 
-| Option | For | Against |
-|---|---|---|
-| Static parse + overrides (chosen) | Fast, does not run user code, uses public parsers only | Misses computed values and integrations that change `outDir` |
-| Private `resolveConfig` from `astro/dist/core/config` | Exact values for literal and computed config | Not in the exports map, so any Astro release can break it. 200–330 ms per project for `.ts` configs. Still misses integration `updateConfig` |
-| Hard-coded `dist` | Simplest | Wrong for any project that sets `outDir` |
+| Option                                                | For                                                    | Against                                                                                                                                      |
+| ----------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Static parse + overrides (chosen)                     | Fast, does not run user code, uses public parsers only | Misses computed values and integrations that change `outDir`                                                                                 |
+| Private `resolveConfig` from `astro/dist/core/config` | Exact values for literal and computed config           | Not in the exports map, so any Astro release can break it. 200–330 ms per project for `.ts` configs. Still misses integration `updateConfig` |
+| Hard-coded `dist`                                     | Simplest                                               | Wrong for any project that sets `outDir`                                                                                                     |
 
 ### 2. Inferred targets (`targets/`)
 
 The names are configurable through plugin options (`buildTargetName` and the others), like `@nx/vite`.
 
-| Target | Command | Cache | Inputs | Outputs | Other |
-|---|---|---|---|---|---|
-| `build` | `astro build` | yes | `production`, `^production`, `externalDependencies: ['astro']` | `{projectRoot}/<outDir>`, `{projectRoot}/.astro` | `dependsOn: ['^build']` |
-| `sync` | `astro sync` | yes | `production`, `externalDependencies: ['astro']` | `{projectRoot}/.astro` | Writes generated types to `.astro/`. Astro hard-codes this path |
-| `check` | `astro check` | yes | `default`, `^production`, `externalDependencies: ['astro', '@astrojs/check', 'typescript']` | none | Inferred only when `@astrojs/check` is installed |
-| `dev` | `astro dev` | no | — | — | `continuous: true` |
-| `preview` | `astro preview` | no | — | — | `continuous: true`, `dependsOn: ['build']` |
+| Target    | Command         | Cache | Inputs                                                                                      | Outputs                                          | Other                                                           |
+| --------- | --------------- | ----- | ------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| `build`   | `astro build`   | yes   | `production`, `^production`, `externalDependencies: ['astro']`                              | `{projectRoot}/<outDir>`, `{projectRoot}/.astro` | `dependsOn: ['^build']`                                         |
+| `sync`    | `astro sync`    | yes   | `production`, `externalDependencies: ['astro']`                                             | `{projectRoot}/.astro`                           | Writes generated types to `.astro/`. Astro hard-codes this path |
+| `check`   | `astro check`   | yes   | `default`, `^production`, `externalDependencies: ['astro', '@astrojs/check', 'typescript']` | none                                             | Inferred only when `@astrojs/check` is installed                |
+| `dev`     | `astro dev`     | no    | —                                                                                           | —                                                | `continuous: true`                                              |
+| `preview` | `astro preview` | no    | —                                                                                           | —                                                | `continuous: true`, `dependsOn: ['build']`                      |
 
 Each command runs with `cwd: {projectRoot}`. Nx runs its own `astro-docs` project the same way, because package scripts failed on the `node_modules` lookup.
 
 The plugin infers `check` only when `@astrojs/check` resolves from the project. Without it, `astro check` shows an interactive install prompt, and that prompt blocks CI.
 
-The plugin caches the targets with `PluginCache`, keyed by `calculateHashesForCreateNodes`, the same way as `packages/vite/src/plugins/plugin.ts` in Nx.
+The plugin does not cache the targets. `PluginCache` and `calculateHashesForCreateNodes` exist only in `@nx/devkit/internal`, and `@nx/vite` needs them because it runs `vite.config`. The static parse takes 0.12 ms per config file (5 ms for the first file), so a cache saves nothing (decision 3).
 
 ### 3. Graph edges (`graph/`)
 
@@ -89,11 +91,11 @@ Step 1, find the import specifiers. Decision: use `@astrojs/compiler-rs`, resolv
 - Measured: 3.6 ms for the first file, 0.02 ms for each file after it.
 - The plugin resolves the parser through `createRequire` from the location of `astro`. Then the parser version always matches the Astro version of the workspace, and the plugin does not add a second native binary.
 
-| Option | For | Against |
-|---|---|---|
-| `@astrojs/compiler-rs` through `astro` (chosen) | Same parser as Astro, fast, already installed | Pre-1.0. The AST shape can change in a minor release |
-| `findImports` from `nx/src/native` | Already handles `.astro`, no extra dependency | Internal to Nx. It also reports CSS `@import`, which creates wrong edges |
-| `@astrojs/compiler` (Go/WASM) | Stable API | Astro 7 does not use it anymore, so the syntax can differ |
+| Option                                          | For                                           | Against                                                                  |
+| ----------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------ |
+| `@astrojs/compiler-rs` through `astro` (chosen) | Same parser as Astro, fast, already installed | Pre-1.0. The AST shape can change in a minor release                     |
+| `findImports` from `nx/src/native`              | Already handles `.astro`, no extra dependency | Internal to Nx. It also reports CSS `@import`, which creates wrong edges |
+| `@astrojs/compiler` (Go/WASM)                   | Stable API                                    | Astro 7 does not use it anymore, so the syntax can differ                |
 
 Step 2, map each specifier to a project.
 
@@ -107,7 +109,9 @@ This step uses only the project graph data that `CreateDependenciesContext` give
 ### 4. Generators
 
 - `init`: adds the plugin to `nx.json` once, and adds `astro` to `devDependencies`. Other generators call it.
-- `application`: creates `astro.config.mjs`, `src/pages/index.astro`, `tsconfig.json` that extends `astro/tsconfigs/strict`, and `package.json`. Options: `directory`, `name`, `tags`, `skipFormat`.
+- `application`: creates `astro.config.mjs`, `src/pages/index.astro`, `tsconfig.json` that extends `astro/tsconfigs/strict`, and `package.json`. Options: `directory`, `name`, `tags`, `integrations`, `skipFormat`.
+- `integrations` is a multiselect with an `x-prompt`, so `nx g` asks the same question as `create-astro`. After the files are written and installed, the generator runs `astro add <names> --yes` in the project folder. Astro then installs the packages and edits `astro.config`, so the plugin keeps no copy of that list (decision 4).
+- `integration`: runs `astro add <names> --yes` for an existing project. Options: `project`, `integrations`.
 
 ### 5. Migrations
 
@@ -122,7 +126,7 @@ Each Astro major gets a migration that updates the `astro` version and prints a 
 
 ## Risks
 
-1. Adapters write more output, for example `.netlify`, and `dist/client` with `dist/server`. The inferred `outputs` can miss it. Mitigation: an `additionalOutputs` option.
+1. Adapters write more output, for example `.netlify`, and `dist/client` with `dist/server`. The inferred `outputs` can miss it. Mitigation, not in the first release: an `additionalOutputs` option.
 2. `@astrojs/compiler-rs` is pre-1.0. Mitigation: all AST access is in one file, with the fixture test.
 3. `@astrojs/check` 0.9.12 accepts `typescript ^5 || ^6`, but `typescript@latest` is 7.0.2. A new workspace can get a peer conflict.
 4. Astro 7 added `--background` and a lock file for `dev`. It is not verified how they interact with continuous tasks in Nx.
@@ -133,22 +137,26 @@ Each Astro major gets a migration that updates the `astro` version and prints a 
 1. Package name: `@code-lovers/nx-astro` (2026-11-09). The `@code-lovers` npm organization holds the public projects. An organization can add co-maintainers, and nobody outside it can publish under the scope. `@wenu` is not used, because its packages will move to `@code-lovers`.
 2. Astro 7 only (2026-11-09). The graph parser is `@astrojs/compiler-rs`, resolved from the installed `astro`. Astro 7 is the first major where that compiler is the only one. Support for Astro 6 could need a second parser for a version that is going away.
 
+3. No target cache (2026-11-09). See section 2. `srcDir` and `publicDir` are not read, because no target uses them.
+
+4. Integrations through `astro add --yes` (2026-11-09). Astro 7.4.7 lists `--yes` in `astro add --help`. Astro maintains the packages and the config change of each integration.
+
 ## Open decisions
 
 None.
 
 ## Tasks
 
-| ID | Task | Depends on |
-|---|---|---|
-| T1 | Create the plugin workspace with `@nx/plugin`, vitest and the e2e setup | — |
-| T2 | `config/`: static parse of `astro.config.*`, with defaults and overrides | T1 |
-| T3 | `targets/` and `createNodes`, with `PluginCache` | T2 |
-| T4 | `graph/`: import specifiers from `.astro` files | T1 |
-| T5 | `graph/`: map specifiers to projects, and `createDependencies` | T4 |
-| T6 | `init` and `application` generators | T3 |
-| T7 | e2e tests: cache and graph edge | T5, T6 |
-| T8 | Try it on one of my Astro projects, then write the README | T7 |
+| ID  | Task                                                                     | Depends on |
+| --- | ------------------------------------------------------------------------ | ---------- |
+| T1  | Create the plugin workspace with `@nx/plugin`, vitest and the e2e setup  | —          |
+| T2  | `config/`: static parse of `astro.config.*`, with defaults and overrides | T1         |
+| T3  | `targets/` and `createNodes`                                             | T2         |
+| T4  | `graph/`: import specifiers from `.astro` files                          | T1         |
+| T5  | `graph/`: map specifiers to projects, and `createDependencies`           | T4         |
+| T6  | `init` and `application` generators                                      | T3         |
+| T7  | e2e tests: cache and graph edge                                          | T5, T6     |
+| T8  | Try it on one of my Astro projects, then write the README                | T7         |
 
 ## Sources
 

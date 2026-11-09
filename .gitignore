@@ -50,3 +50,18 @@ Thumbs.db
 .nx/migrate-runs
 vitest.config.*.timestamp*
 .vitest
+
+# Local AI agent configuration and the private feature logbook
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+.github/agents/
+.github/prompts/
+.github/skills/
+AGENTS.md
+CLAUDE.md
+opencode.json
+odd/

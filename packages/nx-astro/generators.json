@@ -1,0 +1,20 @@
+{
+  "generators": {
+    "init": {
+      "factory": "./dist/generators/init/init",
+      "schema": "./dist/generators/init/schema.json",
+      "description": "Registers the Astro plugin in nx.json and adds astro to the workspace."
+    },
+    "application": {
+      "factory": "./dist/generators/application/application",
+      "schema": "./dist/generators/application/schema.json",
+      "aliases": ["app"],
+      "description": "Creates an Astro application and adds the Astro integrations that you select."
+    },
+    "integration": {
+      "factory": "./dist/generators/integration/integration",
+      "schema": "./dist/generators/integration/schema.json",
+      "description": "Runs astro add to add Astro integrations to an existing Astro project."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base", ":disableDependencyDashboard"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all-non-major-dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "matchPackagePatterns": ["^@nx/", "^nx"],
+      "groupName": "nx monorepo"
+    },
+    {
+      "matchPackagePatterns": ["^eslint", "@eslint"],
+      "groupName": "eslint ecosystem"
+    }
+  ],
+  "schedule": ["before 9am on monday"]
+}

@@ -5,6 +5,9 @@
 
 /// <reference path="registry.d.ts" />
 
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { workspaceRoot } from '@nx/devkit';
 import { startLocalRegistry } from '@nx/js/plugins/jest/local-registry';
 import { releasePublish, releaseVersion } from 'nx/release';
 
@@ -20,18 +23,26 @@ export default async () => {
     verbose: false,
   });
 
-  await releaseVersion({
-    specifier: '0.0.0-e2e',
-    stageChanges: false,
-    gitCommit: false,
-    gitTag: false,
-    firstRelease: true,
-    versionActionsOptionsOverrides: {
-      skipLockFileUpdate: true,
-    },
-  });
-  await releasePublish({
-    tag: 'e2e',
-    firstRelease: true,
-  });
+  // releaseVersion writes 0.0.0-e2e into the package.json of the plugin.
+  // The registry needs it only to publish, so the file gets its version back.
+  const manifestPath = join(workspaceRoot, 'packages/nx-astro/package.json');
+  const manifest = readFileSync(manifestPath, 'utf-8');
+  try {
+    await releaseVersion({
+      specifier: '0.0.0-e2e',
+      stageChanges: false,
+      gitCommit: false,
+      gitTag: false,
+      firstRelease: true,
+      versionActionsOptionsOverrides: {
+        skipLockFileUpdate: true,
+      },
+    });
+    await releasePublish({
+      tag: 'e2e',
+      firstRelease: true,
+    });
+  } finally {
+    writeFileSync(manifestPath, manifest);
+  }
 };
