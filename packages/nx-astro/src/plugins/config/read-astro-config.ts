@@ -9,12 +9,7 @@ export const ASTRO_CONFIG_FILE_NAMES = [
   'astro.config.mts',
 ] as const;
 
-export const ASTRO_CONFIG_KEYS = [
-  'root',
-  'srcDir',
-  'publicDir',
-  'outDir',
-] as const;
+export const ASTRO_CONFIG_KEYS = ['root', 'outDir'] as const;
 
 export type AstroConfigKey = (typeof ASTRO_CONFIG_KEYS)[number];
 
@@ -32,8 +27,6 @@ export interface AstroConfigReadResult {
 
 export const ASTRO_CONFIG_DEFAULTS: AstroConfigFacts = {
   root: '.',
-  srcDir: './src',
-  publicDir: './public',
   outDir: './dist',
 };
 

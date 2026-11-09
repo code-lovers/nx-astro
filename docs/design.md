@@ -22,7 +22,7 @@ An Nx plugin for Astro that works the way the Nx 24 first-party plugins work. Nx
 
 | Dependency | Range | Reason |
 |---|---|---|
-| `nx`, `@nx/devkit` | `^24.0.0` | `CreateNodes`, `PluginCache`, `calculateHashesForCreateNodes`, `continuous` tasks |
+| `nx`, `@nx/devkit` | `^24.0.0` | `CreateNodes`, `createNodesFromFiles`, `continuous` tasks |
 | `astro` | `^7.0.0` | Rust compiler, Vite 8, current config defaults |
 | Node.js | `>=22.23.4` | The `engines.node` of Astro 7 |
 
@@ -45,14 +45,14 @@ src/
 
 ### 1. Config facts (`config/`)
 
-The plugin needs `outDir`, `srcDir` and `publicDir` for the task inputs and outputs. Astro has no public API that returns the resolved config.
+The plugin needs `root` and `outDir` for the task outputs. The task inputs use the named inputs of the project, which already cover `srcDir` and `publicDir`. Astro has no public API that returns the resolved config.
 
 Decision: parse the config file statically and read literal values only.
 
 - The plugin looks for `astro.config.mjs`, `.js`, `.ts` and `.mts`, in the same order as Astro. Astro 6 dropped `.cjs` and `.cts`.
-- The parser reads the object that the file passes to `defineConfig` or exports as default. It reads `outDir`, `srcDir`, `publicDir` and `root` only when each value is a string literal.
-- If a value is not a literal, the plugin uses the Astro default (`./dist`, `./src`, `./public`) and logs a debug message.
-- A plugin option overrides each value: `outDir`, `srcDir`, `publicDir`.
+- The parser reads the object that the file passes to `defineConfig` or exports as default. It reads `root` and `outDir` only when each value is a string literal.
+- If a value is not a literal, the plugin uses the Astro default (`.` and `./dist`) and logs a verbose message.
+- A plugin option overrides each value: `root` and `outDir`.
 
 | Option | For | Against |
 |---|---|---|
@@ -76,7 +76,7 @@ Each command runs with `cwd: {projectRoot}`. Nx runs its own `astro-docs` projec
 
 The plugin infers `check` only when `@astrojs/check` resolves from the project. Without it, `astro check` shows an interactive install prompt, and that prompt blocks CI.
 
-The plugin caches the targets with `PluginCache`, keyed by `calculateHashesForCreateNodes`, the same way as `packages/vite/src/plugins/plugin.ts` in Nx.
+The plugin does not cache the targets. `PluginCache` and `calculateHashesForCreateNodes` exist only in `@nx/devkit/internal`, and `@nx/vite` needs them because it runs `vite.config`. The static parse takes 0.12 ms per config file (5 ms for the first file), so a cache saves nothing (decision 3).
 
 ### 3. Graph edges (`graph/`)
 
@@ -133,6 +133,8 @@ Each Astro major gets a migration that updates the `astro` version and prints a 
 1. Package name: `@code-lovers/nx-astro` (2026-11-09). The `@code-lovers` npm organization holds the public projects. An organization can add co-maintainers, and nobody outside it can publish under the scope. `@wenu` is not used, because its packages will move to `@code-lovers`.
 2. Astro 7 only (2026-11-09). The graph parser is `@astrojs/compiler-rs`, resolved from the installed `astro`. Astro 7 is the first major where that compiler is the only one. Support for Astro 6 could need a second parser for a version that is going away.
 
+3. No target cache (2026-11-09). See section 2. `srcDir` and `publicDir` are not read, because no target uses them.
+
 ## Open decisions
 
 None.
@@ -143,7 +145,7 @@ None.
 |---|---|---|
 | T1 | Create the plugin workspace with `@nx/plugin`, vitest and the e2e setup | — |
 | T2 | `config/`: static parse of `astro.config.*`, with defaults and overrides | T1 |
-| T3 | `targets/` and `createNodes`, with `PluginCache` | T2 |
+| T3 | `targets/` and `createNodes` | T2 |
 | T4 | `graph/`: import specifiers from `.astro` files | T1 |
 | T5 | `graph/`: map specifiers to projects, and `createDependencies` | T4 |
 | T6 | `init` and `application` generators | T3 |

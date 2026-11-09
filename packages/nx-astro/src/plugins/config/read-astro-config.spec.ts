@@ -19,17 +19,10 @@ describe('readAstroConfig', () => {
 
   it('reads string literals passed to defineConfig', () => {
     const result = readAstroConfig(
-      withDefineConfig(
-        "{ root: './site', srcDir: 'app', publicDir: 'static', outDir: './build' }",
-      ),
+      withDefineConfig("{ root: './site', srcDir: 'app', outDir: './build' }"),
     );
 
-    expect(result.facts).toEqual({
-      root: './site',
-      srcDir: 'app',
-      publicDir: 'static',
-      outDir: './build',
-    });
+    expect(result.facts).toEqual({ root: './site', outDir: './build' });
     expect(result.nonLiteralKeys).toEqual([]);
   });
 
@@ -51,27 +44,22 @@ describe('readAstroConfig', () => {
     const source = [
       "import { defineConfig } from 'astro/config';",
       "const out = process.env.OUT ?? 'dist';",
-      'export default defineConfig({ outDir: out, srcDir: `s${1}` });',
+      'export default defineConfig({ outDir: out, root: `s${1}` });',
     ].join('\n');
 
     const result = readAstroConfig(source);
 
     expect(result.facts).toEqual(ASTRO_CONFIG_DEFAULTS);
-    expect(result.nonLiteralKeys).toEqual(['srcDir', 'outDir']);
+    expect(result.nonLiteralKeys).toEqual(['root', 'outDir']);
   });
 
   it('lets each defined override win over the literal and the default', () => {
     const result = readAstroConfig(withDefineConfig("{ outDir: './build' }"), {
       outDir: 'override-out',
-      srcDir: 'override-src',
-      publicDir: undefined,
+      root: undefined,
     });
 
-    expect(result.facts).toEqual({
-      ...ASTRO_CONFIG_DEFAULTS,
-      outDir: 'override-out',
-      srcDir: 'override-src',
-    });
+    expect(result.facts).toEqual({ root: '.', outDir: 'override-out' });
   });
 
   it('does not report a non-literal key that an override replaces', () => {
@@ -106,12 +94,7 @@ describe('readAstroConfig', () => {
 
 describe('ASTRO_CONFIG_DEFAULTS', () => {
   it('matches the defaults of astro 7 in dist/core/config/schemas/defaults.js', () => {
-    expect(ASTRO_CONFIG_DEFAULTS).toEqual({
-      root: '.',
-      srcDir: './src',
-      publicDir: './public',
-      outDir: './dist',
-    });
+    expect(ASTRO_CONFIG_DEFAULTS).toEqual({ root: '.', outDir: './dist' });
   });
 });
 
