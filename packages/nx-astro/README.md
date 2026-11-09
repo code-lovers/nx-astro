@@ -123,9 +123,15 @@ npx nx g @code-lovers/nx-astro:application apps/site
 | `integrations` | Astro integrations that `astro add` adds after the install, for example `react,mdx`. Without this option, the generator asks. |
 | `skipFormat`   | Do not format the generated files.                                                                                            |
 
-The generator writes `astro.config.mjs`, `tsconfig.json`, `src/pages/index.astro` and `package.json`. Then it installs the packages and runs `astro add` in the project folder.
+The generator writes `astro.config.mjs`, `tsconfig.json` and `src/pages/index.astro`. Then it installs the packages and runs `astro add` in the project folder.
 
-If the workspace uses package manager workspaces (`pnpm-workspace.yaml` or `workspaces` in `package.json`), the generator adds the folder to them, like the Nx application generators do. Otherwise, it writes a `project.json`.
+The other files depend on the workspace, like in the Nx application generators:
+
+- If the workspace uses package manager workspaces (`pnpm-workspace.yaml` with `packages`, or `workspaces` in `package.json`), the generator writes a `package.json` for the project and adds the folder to the workspaces.
+- Otherwise, it writes a `project.json`. The project has no `package.json`, so `astro add` installs the integrations in the root `package.json`.
+
+> [!NOTE]
+> If `astro add` fails, for example because an integration does not exist, the project files stay in place. Add the integrations again with the [`integration`](#integration) generator.
 
 ### `integration`
 
@@ -174,4 +180,5 @@ Set the options in the `nx.json` entry of the plugin:
 
 - The plugin finds graph edges in `.astro` files only. Imports in `.md`, `.mdx` and `.mdoc` files give no edge. Imports in `.ts` and `.js` files get their edges from Nx.
 - If the config exports a variable (`export default config`), the plugin cannot read it and uses the defaults or the plugin options.
+- Without package manager workspaces, run the `integration` generator before the first build of the project. The build creates `node_modules` in the project folder for its cache, and after that the package manager installs new integrations there instead of in the root `package.json`. Workspaces do not have this problem.
 - The graph edge does not link the package. To import a workspace package at build time, add it to the `dependencies` of the Astro project, for example `"@acme/ui": "workspace:*"` with pnpm.
