@@ -302,9 +302,6 @@ importers:
       radashi:
         specifier: ^13.0.4
         version: 13.0.4
-      tslib:
-        specifier: ^2.3.0
-        version: 2.9.1
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
