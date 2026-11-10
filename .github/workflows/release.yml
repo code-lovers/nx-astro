@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write # npm trusted publishing and provenance
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -50,8 +50,8 @@ jobs:
         run: pnpm nx run-many -t test build -p nx-astro
       - name: Check the package
         run: pnpm check:package
+      # npm trusted publishing: pnpm exchanges the OIDC token of this job for a
+      # short-lived npm token, so the repository stores no npm token.
       - name: Publish to npm
         working-directory: packages/nx-astro
         run: pnpm publish --provenance --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
