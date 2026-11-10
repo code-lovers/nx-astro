@@ -1,0 +1,97 @@
+name: 🐞 Bug report
+description: Something does not work as the documentation says.
+labels: ['type: bug', 'needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A small reproduction lets us fix the bug faster.
+        You can leave out the fields that do not apply.
+
+  - type: checkboxes
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the [existing issues](../issues?q=is%3Aissue) and found no report of this bug.
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: Area
+      options:
+        - Inferred tasks (build, sync, dev, preview, check)
+        - Cache
+        - Project graph
+        - application generator
+        - integration generator
+        - init / nx add
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Current behavior
+      description: What happens? Include the command that you ran.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Minimal reproduction
+      description: |
+        A link to a Git repository or a StackBlitz project that shows the bug.
+        [What is a minimal reproduction?](https://antfu.me/posts/why-reproductions-are-required)
+      placeholder: https://github.com/...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. `pnpm install`
+        2. `pnpm nx build site`
+        3. ...
+
+  - type: input
+    attributes:
+      label: Last version that worked
+      description: If this worked before, the version of `@code-lovers/nx-astro` where it last worked.
+      placeholder: 0.1.0
+
+  - type: textarea
+    attributes:
+      label: nx report
+      description: Paste the output of `npx nx report`. It shows the versions of Nx, its plugins, Node.js and the package manager.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Astro version
+      placeholder: 7.4.7
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Operating system
+      multiple: true
+      options:
+        - macOS
+        - Linux
+        - Windows
+
+  - type: textarea
+    attributes:
+      label: Other information
+      description: Logs, the Astro config file, or the output of `NX_VERBOSE_LOGGING=true`.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Plugin documentation
+    url: https://github.com/code-lovers/nx-astro/tree/main/packages/nx-astro#readme
+    about: Read the tasks, generators, options and known limitations first.
+  - name: 🔒 Report a vulnerability
+    url: https://github.com/code-lovers/nx-astro/security/advisories/new
+    about: Report security problems in private, not in a public issue.
