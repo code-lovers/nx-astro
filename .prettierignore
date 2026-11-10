@@ -5,3 +5,5 @@
 /.nx/workspace-data
 .nx/self-healing
 pnpm-lock.yaml
+# release-please writes the changelog in its own format.
+CHANGELOG.md
