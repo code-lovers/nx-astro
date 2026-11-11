@@ -5,6 +5,8 @@ name: PR Labeler
 on:
   pull_request_target: # zizmor: ignore[dangerous-triggers]
 
+permissions: {}
+
 jobs:
   labeler:
     runs-on: ubuntu-latest
