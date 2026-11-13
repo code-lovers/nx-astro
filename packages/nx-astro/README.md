@@ -37,6 +37,16 @@ npx nx add @code-lovers/nx-astro
 
 The command installs the package, registers `@code-lovers/nx-astro/plugin` in `nx.json`, and adds `.astro/` to the root `.gitignore`.
 
+> [!NOTE]
+> On pnpm 12, `nx add` can stop with `ERR_PNPM_IGNORED_BUILDS`, because pnpm blocks the install scripts of `nx` and `@swc/core`. This happens with every Nx plugin in a new workspace. The plugin is registered in `nx.json` before the error. To let the scripts run, add them to `pnpm-workspace.yaml`, then run `pnpm install`:
+>
+> ```yaml
+> allowBuilds:
+>   nx: true
+>   '@swc/core': true
+>   esbuild: true
+> ```
+
 > [!IMPORTANT]
 > Astro writes generated types to `.astro/` in each project. If git does not ignore that folder, the input hash changes after each build and Nx never reads the build from the cache. Keep `.astro/` in `.gitignore`.
 

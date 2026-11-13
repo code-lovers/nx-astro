@@ -19,3 +19,5 @@ pnpm exec knip
 ```
 
 The e2e test publishes the plugin to a local registry, creates a new Nx workspace in the system temp folder, and runs the generators, a cached build and `nx graph` there.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the commit convention, the pull request flow and the releases.
