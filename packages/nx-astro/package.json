@@ -1,6 +1,6 @@
 {
   "name": "@code-lovers/nx-astro",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nx plugin for Astro: inferred and cached tasks, project graph edges from .astro imports, and generators.",
   "license": "MIT",
   "repository": {

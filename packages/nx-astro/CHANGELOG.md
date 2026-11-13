@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/code-lovers/nx-astro/compare/nx-astro-v0.1.0...nx-astro-v0.1.1) (2026-11-13)
+
+
+### Documentation
+
+* **repo:** add a contributing guide and the pnpm 12 allowBuilds note ([786c70a](https://github.com/code-lovers/nx-astro/commit/786c70abb8d463ad23c710e2930b1d0f5704523b))
+* **repo:** add a contributing guide and the pnpm 12 allowBuilds note ([8a6e66a](https://github.com/code-lovers/nx-astro/commit/8a6e66a63b66dfbaae60ef9b0fac1e1d843c6e02))
+
 ## 0.1.0 (2026-11-10)
 
 
