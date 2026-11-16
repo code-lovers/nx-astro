@@ -1,0 +1,29 @@
+name: Welcome
+
+# pull_request_target gives the token write access on PRs from forks, so the
+# action can comment on them. The job never checks out the PR code.
+on:
+  issues:
+    types: [opened]
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          issue_message: |
+            Thank you for your first issue in nx-astro! 👋
+
+            We read each issue and answer in a few days. If you have not done it yet, add the versions of Nx, Astro and Node.js, and the steps that show the problem.
+          pr_message: |
+            Thank you for your first pull request in nx-astro! 🎉
+
+            Before the review, please read [CONTRIBUTING.md](https://github.com/code-lovers/nx-astro/blob/main/CONTRIBUTING.md). The commit messages must follow Conventional Commits, because they decide the next release. The bot comment from pkg.pr.new gives a preview package that you can install to test the change.
