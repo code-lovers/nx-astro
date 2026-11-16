@@ -15,6 +15,7 @@ jobs:
       pull-requests: write
     outputs:
       release_created: ${{ steps.release.outputs['packages/nx-astro--release_created'] }}
+      tag_name: ${{ steps.release.outputs['packages/nx-astro--tag_name'] }}
     steps:
       - name: Run release-please
         id: release
@@ -23,6 +24,59 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Adds the people who wrote the commits of the release to its notes, and
+  # names the first-time contributors that GitHub finds.
+  thank-contributors:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - name: Add the contributors to the release notes
+        run: |
+          set -euo pipefail
+          body=$(gh release view "$TAG" --json body --jq .body)
+          if grep -q '^#### Committers' <<<"$body"; then
+            echo "The notes of $TAG already list the committers."
+            exit 0
+          fi
+          # The list is newest first, so the second entry is the previous release.
+          previous=$(gh release list --exclude-drafts --limit 2 --json tagName --jq '.[1].tagName // empty')
+          if [ -z "$previous" ]; then
+            echo "$TAG is the first release. There is no range to read."
+            exit 0
+          fi
+
+          logins=$(gh api "repos/$GH_REPO/compare/$previous...$TAG" --paginate \
+            --jq '.commits[] | select(.author != null and .author.type != "Bot") | .author.login' | sort -fu)
+          if [ -z "$logins" ]; then
+            echo "No commit in $previous...$TAG has a GitHub author."
+            exit 0
+          fi
+
+          section="#### Committers: $(wc -l <<<"$logins" | tr -d ' ')"$'\n'
+          while read -r login; do
+            name=$(gh api "users/$login" --jq '.name // .login')
+            section+="- $name ([@$login](https://github.com/$login))"$'\n'
+          done <<<"$logins"
+
+          newcomers=$(gh api -X POST "repos/$GH_REPO/releases/generate-notes" \
+            -f tag_name="$TAG" -f previous_tag_name="$previous" --jq .body |
+            sed -n 's/^\* @\([^ ]*\) made their first contribution in \(.*\)$/- [@\1](https:\/\/github.com\/\1) made their first contribution in \2/p' |
+            grep -v '\[bot\]' || true)
+          if [ -n "$newcomers" ]; then
+            section+=$'\n'"#### New contributors"$'\n'"$newcomers"$'\n'
+          fi
+
+          printf '%s\n\n%s' "$body" "$section" > notes.md
+          gh release edit "$TAG" --notes-file notes.md
 
   publish:
     needs: release-please
