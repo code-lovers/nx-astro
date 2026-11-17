@@ -2,6 +2,8 @@ name: Commit Lint
 
 on:
   pull_request:
+    # edited: lint the title again when someone changes it.
+    types: [opened, synchronize, reopened, edited]
 
 permissions: {}
 
@@ -26,3 +28,9 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Validate commit messages
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+      # The repository squash-merges with the pull request title as the commit
+      # message, so the title decides the release.
+      - name: Validate the pull request title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint --verbose
