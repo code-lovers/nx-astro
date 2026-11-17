@@ -66,6 +66,12 @@ You do not publish by hand:
 
 1. After a merge to `main`, [release-please](https://github.com/googleapis/release-please) opens or updates a release pull request. It contains the next version and the changelog.
 2. A maintainer merges the release pull request.
-3. The release workflow publishes the package to npm with provenance, through npm trusted publishing.
+3. The release workflow stages the new version on npm with provenance, through npm trusted publishing. A staged version is on the registry, but users cannot install it yet.
+4. A maintainer with 2FA approves the staged version. Then npm makes it public:
+
+   ```sh
+   npm stage list @code-lovers/nx-astro
+   npm stage approve <stage-id>
+   ```
 
 Renovate opens the pull requests for dependency updates on Monday mornings.
