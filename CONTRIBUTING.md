@@ -43,7 +43,7 @@ If you change a task, a generator or an option, update [packages/nx-astro/README
 
 ## Write commits
 
-Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). The type decides the next release:
+Commit messages and the pull request title follow [Conventional Commits](https://www.conventionalcommits.org/). The repository squash-merges each pull request, and the title becomes the commit message on `main`. The type of the title decides the next release:
 
 | Type                                           | Release                                    |
 | ---------------------------------------------- | ------------------------------------------ |
@@ -56,7 +56,7 @@ Use the type that a user of the package sees. A change to the README only is `do
 
 ## Open a pull request
 
-The `main` branch accepts a change only through a pull request. The `main` and `lint` checks must pass before the merge.
+The `main` branch accepts a change only through a pull request. The `main` and `lint` checks must pass before the merge. The `lint` check runs commitlint on each commit and on the pull request title.
 
 Each pull request gets a preview package from [pkg.pr.new](https://pkg.pr.new). The `pkg-pr-new` bot comment on the pull request gives the install command. Use it to test the change in another workspace before the release.
 
