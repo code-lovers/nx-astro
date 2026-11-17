@@ -104,8 +104,15 @@ jobs:
         run: pnpm nx run-many -t test build -p nx-astro
       - name: Check the package
         run: pnpm check:package
-      # npm trusted publishing: pnpm exchanges the OIDC token of this job for a
-      # short-lived npm token, so the repository stores no npm token.
-      - name: Publish to npm
+      # npm 11.20 is the first release with `npm stage`.
+      - name: Install npm with staged publishing
+        run: npm install --global npm@11.20.0 # zizmor: ignore[adhoc-packages] exact version, no cache in this job
+      # npm trusted publishing: npm exchanges the OIDC token of this job for a
+      # short-lived token, so the repository stores no npm token. The token can
+      # only stage the version. A maintainer approves it with 2FA.
+      # pnpm added the root LICENSE to the package, npm does not.
+      - name: Stage the version on npm
         working-directory: packages/nx-astro
-        run: pnpm publish --provenance --access public --no-git-checks
+        run: |
+          cp ../../LICENSE LICENSE
+          npm stage publish --provenance --access public
